@@ -17,7 +17,10 @@ func main() {
 		log.Fatal("Error: ", err)
 	}
 
-	defer listener.Close()
+	defer func() {
+		log.Print("Closing connections")
+		listener.Close()
+	}()
 	log.Println("Listening on " + CONN_HOST)
 	for {
 		conn, err := listener.Accept()
@@ -25,5 +28,6 @@ func main() {
 			log.Fatal("Error accepting", err.Error())
 		}
 		log.Print(conn)
+		break
 	}
 }
