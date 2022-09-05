@@ -44,6 +44,7 @@ func getRoutes() Routes {
 	return Routes{
 		Route{handlerFunction: getRecords, name: "getRecords", path: "/get", method: "GET"},
 		Route{handlerFunction: addRecord, name: "addRecord", path: "/add", method: "POST"},
+		Route{handlerFunction: updateRecord, name: "updateRecord", path: "/update", method: "PUT"},
 	}
 }
 
@@ -92,6 +93,19 @@ func addRecord(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := result.LastInsertId()
 	fmt.Fprintf(w, "inserted id: %d", id)
+}
+
+func updateRecord(w http.ResponseWriter, r *http.Request) {
+	var employee Employee
+	json.NewDecoder(r.Body).Decode(&employee)
+	stmt, err := dbConnection.Prepare("UPDATE myTable SET Name=? WHERE Id=?")
+	if err != nil {
+		log.Println("Failed to update employee")
+	}
+	result, err := stmt.Exec(employee.Name, employee.Id)
+	rowsAffected, err := result.RowsAffected()
+	fmt.Printf("Rows affected: %d", rowsAffected)
+	getRecords(w, r)
 }
 
 func main() {
