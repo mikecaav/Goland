@@ -45,6 +45,7 @@ func getRoutes() Routes {
 		Route{handlerFunction: getRecords, name: "getRecords", path: "/get", method: "GET"},
 		Route{handlerFunction: addRecord, name: "addRecord", path: "/add", method: "POST"},
 		Route{handlerFunction: updateRecord, name: "updateRecord", path: "/update", method: "PUT"},
+		Route{handlerFunction: deleteRecord, name: "deleteRecord", path: "/delete", method: "DELETE"},
 	}
 }
 
@@ -104,6 +105,25 @@ func updateRecord(w http.ResponseWriter, r *http.Request) {
 	}
 	result, err := stmt.Exec(employee.Name, employee.Id)
 	rowsAffected, err := result.RowsAffected()
+	fmt.Printf("Rows affected: %d", rowsAffected)
+	getRecords(w, r)
+}
+
+func deleteRecord(w http.ResponseWriter, r *http.Request) {
+	var employee Employee
+	json.NewDecoder(r.Body).Decode(&employee)
+	stmt, err := dbConnection.Prepare("DELETE FROM myTable WHERE Id=?")
+	if err != nil {
+		log.Println("Failed to delete employee")
+	}
+	result, err := stmt.Exec(employee.Id)
+	if err != nil {
+		log.Printf("Error when executing query \n%s", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Printf("Erro when showing rows: \n%s\n", err)
+	}
 	fmt.Printf("Rows affected: %d", rowsAffected)
 	getRecords(w, r)
 }
